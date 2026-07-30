@@ -49,32 +49,33 @@ nutriscale/
 
 ## 🚀 Cara Menjalankan Aplikasi Secara Lokal
 ### 1. Clone Repositori
-```bash
+```Bash
 git clone [https://github.com/rayrachman/nutriscale.git](https://github.com/rayrachman/nutriscale.git)
 cd nutriscale
-
+```
 ### 2. Buat & Aktifkan Virtual Environment (Disarankan)
 Linux / macOS:
-Bash
+```Bash
 python3 -m venv venv
 source venv/bin/activate
+```
 Windows:
-Bash
+```Bash
 python -m venv venv
 venv\Scripts\activate
-
+```
 ### 3. Install Dependensi
-Bash
+```Bash
 pip install -r requirements.txt
-
+```
 ### 4. Inisialisasi Database
-Bash
+```Bash
 python database.py
-
+```
 ### 5. Jalankan Aplikasi
-Bash
+```Bash
 streamlit run app.py
-
+```
 ### 💡 Informasi: Aplikasi akan otomatis terbuka di peramban web Anda pada alamat http://localhost:8501.
 
 ## 📦 Berkas Dependensi (requirements.txt)

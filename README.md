@@ -35,29 +35,28 @@
 
 ## 🚀 Cara Menjalankan Aplikasi Secara Lokal
 
-## 🚀 Cara Menjalankan Aplikasi Secara Lokal
-
 ### 1. Clone Repositori
 ```bash
 git clone [https://github.com/rayrachman/nutriscale.git](https://github.com/rayrachman/nutriscale.git)
 cd nutriscale
-2. Install Dependensi
+### 2. Install Dependensi
 Bash
 pip install -r requirements.txt
-3. Inisialisasi Database
+### 3. Inisialisasi Database
 Bash
 python database.py
-4. Jalankan Aplikasi Streamlit
+### 4. Jalankan Aplikasi Streamlit
 Bash
 streamlit run app.py
 Aplikasi akan otomatis terbuka di browser Anda pada alamat http://localhost:8501.
 
-📦 File Requirements (requirements.txt)
+## 📦 File Requirements (requirements.txt)
 Pastikan Anda memiliki berkas requirements.txt berisi:
 
 Plaintext
 streamlit
 pandas
 openpyxl
-👨‍💻 Kredit & Pengembang
+
+## 👨‍💻 Kredit & Pengembang
 Dikembangkan oleh @rayrachman Project NutriScale - Solusi Teknologi Digitalisasi Layanan Gizi SPPG.

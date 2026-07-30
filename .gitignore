@@ -1,4 +1,10 @@
 __pycache__/
 *.pyc
-*.db
+*.pyo
 .vscode/
+.idea/
+*.egg-info/
+dist/
+build/
+venv/
+.env

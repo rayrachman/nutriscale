@@ -4,8 +4,11 @@ import pandas as pd
 import sqlite3
 import os
 
-DB_PATH = "nutriscale.db"
-CSV_PATH = "nutrition.csv"
+# Path absolut relatif terhadap lokasi file ini
+_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(_BASE_DIR, "nutriscale.db")
+CSV_PATH = os.path.join(_BASE_DIR, "nutrition.csv")
+DATASET_CSV_PATH = os.path.join(_BASE_DIR, "dataset", "nutrition.csv")
 
 def parse_float(val):
     """Mengonversi string bertanda koma Indonesia (misal: '435,00') menjadi float (435.0)"""
@@ -60,7 +63,7 @@ def setup_database():
     # Impor data jika tabel bahan_pangan masih kosong
     cursor.execute("SELECT COUNT(*) FROM bahan_pangan")
     if cursor.fetchone()[0] == 0:
-        actual_csv = CSV_PATH if os.path.exists(CSV_PATH) else ("dataset/nutrition.csv" if os.path.exists("dataset/nutrition.csv") else None)
+        actual_csv = CSV_PATH if os.path.exists(CSV_PATH) else (DATASET_CSV_PATH if os.path.exists(DATASET_CSV_PATH) else None)
         
         if actual_csv:
             try:
@@ -101,10 +104,11 @@ def setup_database():
     conn.close()
 
 def init_db():
+    """Inisialisasi database — cukup dipanggil sekali saat startup aplikasi."""
     setup_database()
 
 def cari_bahan_pangan(keyword: str):
-    setup_database()
+    """Mencari bahan pangan berdasarkan kata kunci nama."""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     query = "SELECT id, nama, kalori, protein, lemak, karbohidrat, bdd, is_custom FROM bahan_pangan WHERE nama LIKE ? LIMIT 20"
@@ -118,7 +122,7 @@ def cari_bahan_pangan(keyword: str):
     } for r in rows]
 
 def tambah_bahan_custom(nama: str, kalori: float, protein: float, lemak: float, karbohidrat: float, bdd: float = 100.0):
-    setup_database()
+    """Menambahkan bahan pangan baru (kustom) ke database."""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute(
@@ -130,7 +134,7 @@ def tambah_bahan_custom(nama: str, kalori: float, protein: float, lemak: float, 
     return True
 
 def update_bahan_pangan(id_bahan: int, nama: str, kalori: float, protein: float, lemak: float, karbohidrat: float, bdd: float = 100.0):
-    setup_database()
+    """Memperbarui data bahan pangan berdasarkan ID."""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     query = """
@@ -144,7 +148,7 @@ def update_bahan_pangan(id_bahan: int, nama: str, kalori: float, protein: float,
     return True
 
 def simpan_menu_harian(tanggal, siklus_hari, waktu_makan, daftar_bahan):
-    setup_database()
+    """Menyimpan log menu harian ke database."""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     for item in daftar_bahan:
@@ -161,8 +165,17 @@ def simpan_menu_harian(tanggal, siklus_hari, waktu_makan, daftar_bahan):
     conn.commit()
     conn.close()
 
+def hapus_log_menu(log_id: int):
+    """Menghapus satu entri log menu harian berdasarkan ID."""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM log_menu_harian WHERE id = ?", (log_id,))
+    conn.commit()
+    conn.close()
+    return True
+
 def ambil_laporan_harian(tanggal_awal, tanggal_akhir):
-    setup_database()
+    """Mengambil data laporan harian berdasarkan rentang tanggal."""
     conn = sqlite3.connect(DB_PATH)
     query = """
         SELECT tanggal, siklus_hari, waktu_makan, nama_menu, bahan_pangan, 

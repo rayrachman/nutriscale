@@ -11,6 +11,8 @@ from database import (
     update_bahan_pangan,
     DB_PATH
 )
+from calculator import konversi_berat, hitung_nutrisi_bahan
+from exporter import export_to_excel, export_to_csv, export_to_word
 
 # Inisialisasi Database
 init_db()
@@ -20,6 +22,15 @@ st.set_page_config(page_title="NutriScale SPPG - Perencanaan & Log Gizi", page_i
 # =========================================================
 # STYLING TEMA FULL BACKGROUND BIRU SPPG (CUSTOM CSS)
 # =========================================================
+
+# Muat CSS eksternal jika ada
+import os
+_CSS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "style.css")
+if os.path.exists(_CSS_PATH):
+    with open(_CSS_PATH, "r", encoding="utf-8") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+# CSS inline untuk tema Streamlit
 st.markdown("""
 <style>
     /* 1. Latar Belakang Utama Seluruh Aplikasi (Full Background Biru Soft) */
@@ -144,7 +155,7 @@ with tab1:
     with col_tgl:
         tgl_saji = st.date_input("Tanggal Penyajian", datetime.now())
     with col_siklus:
-        siklus = st.selectbox("Siklus Menu", ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"])
+        siklus = st.selectbox("Siklus Hari", ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"])
     with col_porsi:
         porsi_makan = st.selectbox("Porsi Makanan", ["Standard / Biasa", "Kecil", "Besar"])
 
@@ -207,15 +218,28 @@ with tab1:
     if st.session_state.keranjang_sppg:
         df_cart = pd.DataFrame(st.session_state.keranjang_sppg)
 
-        # Hitung Nilai Turunan (Berat Bersih & Nutrisi)
-        df_cart["Berat Bersih (g)"] = df_cart["Berat Kotor (g)"] * (df_cart["% BDD"] / 100.0)
-        faktor = df_cart["Berat Bersih (g)"] / 100.0
-        
-        df_cart["Energi (kcal)"] = (df_cart["kal_100"] * faktor).round(1)
-        df_cart["Protein (g)"] = (df_cart["prot_100"] * faktor).round(1)
-        df_cart["Lemak (g)"] = (df_cart["lem_100"] * faktor).round(1)
-        df_cart["Karbohidrat (g)"] = (df_cart["karb_100"] * faktor).round(1)
-        df_cart["Berat Bersih (g)"] = df_cart["Berat Bersih (g)"].round(1)
+        # Hitung Nilai Turunan menggunakan modul calculator
+        berat_bersih_list = []
+        energi_list = []
+        protein_list = []
+        lemak_list = []
+        karbo_list = []
+
+        for _, row in df_cart.iterrows():
+            _, berat_bersih = konversi_berat(row["Berat Kotor (g)"], row["% BDD"], "kotor")
+            nutrisi = hitung_nutrisi_bahan(berat_bersih, row["kal_100"], row["prot_100"], row["lem_100"], row["karb_100"])
+            
+            berat_bersih_list.append(round(berat_bersih, 1))
+            energi_list.append(nutrisi["kalori"])
+            protein_list.append(nutrisi["protein"])
+            lemak_list.append(nutrisi["lemak"])
+            karbo_list.append(nutrisi["karbohidrat"])
+
+        df_cart["Berat Bersih (g)"] = berat_bersih_list
+        df_cart["Energi (kcal)"] = energi_list
+        df_cart["Protein (g)"] = protein_list
+        df_cart["Lemak (g)"] = lemak_list
+        df_cart["Karbohidrat (g)"] = karbo_list
         df_cart["Berat Kotor (g)"] = df_cart["Berat Kotor (g)"].round(1)
 
         # Tampilkan Tabel Data Editor yang Hanya Mengizinkan Edit "Berat Kotor (g)"
@@ -269,23 +293,27 @@ with tab1:
 
         with col_simpan:
             if st.button("💾 Simpan Menu Hari Ini ke Database", type="primary", use_container_width=True):
-                daftar_bahan = []
-                for _, row in edited_cart.iterrows():
-                    daftar_bahan.append({
-                        "nama_menu": nama_menu,
-                        "bahan_pangan": row["Komposisi Makanan"],
-                        "berat_kotor": row["Berat Kotor (g)"],
-                        "berat_bersih": row["Berat Bersih (g)"],
-                        "bdd": row["% BDD"],
-                        "energi_kcal": row["Energi (kcal)"],
-                        "protein_g": row["Protein (g)"],
-                        "lemak_g": row["Lemak (g)"],
-                        "karbo_g": row["Karbohidrat (g)"]
-                    })
-                
-                simpan_menu_harian(tgl_saji.strftime("%Y-%m-%d"), siklus, porsi_makan, daftar_bahan)
-                st.success("🎉 Data menu harian berhasil disimpan ke database!")
-                st.session_state.keranjang_sppg = []
+                # Validasi: nama menu wajib diisi
+                if not nama_menu.strip():
+                    st.error("⚠️ **Nama Menu / Hidangan** wajib diisi sebelum menyimpan!")
+                else:
+                    daftar_bahan = []
+                    for _, row in edited_cart.iterrows():
+                        daftar_bahan.append({
+                            "nama_menu": nama_menu.strip(),
+                            "bahan_pangan": row["Komposisi Makanan"],
+                            "berat_kotor": row["Berat Kotor (g)"],
+                            "berat_bersih": row["Berat Bersih (g)"],
+                            "bdd": row["% BDD"],
+                            "energi_kcal": row["Energi (kcal)"],
+                            "protein_g": row["Protein (g)"],
+                            "lemak_g": row["Lemak (g)"],
+                            "karbo_g": row["Karbohidrat (g)"]
+                        })
+                    
+                    simpan_menu_harian(tgl_saji.strftime("%Y-%m-%d"), siklus, porsi_makan, daftar_bahan)
+                    st.success("🎉 Data menu harian berhasil disimpan ke database!")
+                    st.session_state.keranjang_sppg = []
     else:
         st.caption("📌 *Belum ada bahan makanan yang ditambahkan. Gunakan pencarian di atas untuk memasukkan bahan baku.*")
 
@@ -307,31 +335,68 @@ with tab2:
         if df_laporan.empty:
             st.warning("Belum ada data menu yang tersimpan pada rentang tanggal tersebut.")
         else:
-            st.markdown("### Ringkasan Konsumsi Gizi Per Hari")
-            
-            rekap_harian = df_laporan.groupby("tanggal").agg({
-                "berat_kotor": "sum",
-                "berat_bersih": "sum",
-                "energi_kcal": "sum",
-                "protein_g": "sum",
-                "lemak_g": "sum",
-                "karbo_g": "sum"
-            }).reset_index()
-            
-            st.dataframe(rekap_harian.round(1), use_container_width=True)
-            
-            st.markdown("### Grafik Asupan Energi Harian (kcal)")
-            st.line_chart(rekap_harian.set_index("tanggal")["energi_kcal"])
-            
-            st.markdown("### Rincian Lengkap Bahan & Menu (Laporan SPPG)")
-            st.dataframe(df_laporan, use_container_width=True)
-            
-            excel_data = df_laporan.to_csv(index=False).encode('utf-8')
+            # Simpan ke session state agar bisa digunakan oleh tombol download
+            st.session_state['laporan_data'] = df_laporan
+            st.session_state['laporan_tgl_mulai'] = tgl_mulai.strftime("%Y-%m-%d")
+            st.session_state['laporan_tgl_selesai'] = tgl_selesai.strftime("%Y-%m-%d")
+
+    # Tampilkan laporan jika ada di session state
+    if 'laporan_data' in st.session_state and not st.session_state['laporan_data'].empty:
+        df_laporan = st.session_state['laporan_data']
+        tgl_mulai_str = st.session_state['laporan_tgl_mulai']
+        tgl_selesai_str = st.session_state['laporan_tgl_selesai']
+        
+        st.markdown("### Ringkasan Konsumsi Gizi Per Hari")
+        
+        rekap_harian = df_laporan.groupby("tanggal").agg({
+            "berat_kotor": "sum",
+            "berat_bersih": "sum",
+            "energi_kcal": "sum",
+            "protein_g": "sum",
+            "lemak_g": "sum",
+            "karbo_g": "sum"
+        }).reset_index()
+        
+        st.dataframe(rekap_harian.round(1), use_container_width=True)
+        
+        st.markdown("### Grafik Asupan Energi Harian (kcal)")
+        st.line_chart(rekap_harian.set_index("tanggal")["energi_kcal"])
+        
+        st.markdown("### Rincian Lengkap Bahan & Menu (Laporan SPPG)")
+        st.dataframe(df_laporan, use_container_width=True)
+        
+        # Tombol Ekspor — CSV, Excel, dan Word
+        st.markdown("### 📥 Unduh Laporan")
+        col_dl1, col_dl2, col_dl3 = st.columns(3)
+        
+        with col_dl1:
+            csv_data = export_to_csv(df_laporan)
             st.download_button(
-                label="📥 Unduh Laporan Lengkap (CSV / Excel)",
+                label="📄 Unduh CSV",
+                data=csv_data,
+                file_name=f"Laporan_Gizi_SPPG_{tgl_mulai_str}_sd_{tgl_selesai_str}.csv",
+                mime="text/csv",
+                use_container_width=True,
+            )
+        
+        with col_dl2:
+            excel_data = export_to_excel(df_laporan)
+            st.download_button(
+                label="📊 Unduh Excel",
                 data=excel_data,
-                file_name=f"Laporan_Gizi_SPPG_{tgl_mulai}_sd_{tgl_selesai}.csv",
-                mime="text/csv"
+                file_name=f"Laporan_Gizi_SPPG_{tgl_mulai_str}_sd_{tgl_selesai_str}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True,
+            )
+        
+        with col_dl3:
+            word_data = export_to_word(df_laporan, tgl_mulai_str, tgl_selesai_str)
+            st.download_button(
+                label="📝 Unduh Word",
+                data=word_data,
+                file_name=f"Laporan_Gizi_SPPG_{tgl_mulai_str}_sd_{tgl_selesai_str}.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                use_container_width=True,
             )
 
 # =========================================================

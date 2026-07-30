@@ -1,90 +1,132 @@
 # exporter.py
+"""
+Modul ekspor laporan NutriScale — mendukung format Excel (.xlsx), Word (.docx), dan CSV.
+"""
 
 import io
 import pandas as pd
 from docx import Document
-from docx.shared import Inches, Pt, RGBColor
+from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
-def export_to_excel(data_pasien: dict, rincian_menu: list, total_asupan: dict, target_akg: dict) -> io.BytesIO:
+
+def export_to_excel(df_laporan: pd.DataFrame, judul: str = "Laporan Gizi SPPG") -> io.BytesIO:
     """
-    Menghasilkan file Excel (.xlsx) dalam bentuk BytesIO buffer (siap di-download di Streamlit).
+    Menghasilkan file Excel (.xlsx) dari DataFrame laporan harian.
+    
+    Args:
+        df_laporan: DataFrame berisi data laporan (dari ambil_laporan_harian).
+        judul: Judul untuk sheet Excel.
+    
+    Returns:
+        BytesIO buffer berisi file .xlsx (siap di-download di Streamlit).
     """
     output = io.BytesIO()
     
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        # Sheet 1: Profil Pasien & Ringkasan Target
-        df_pasien = pd.DataFrame([data_pasien])
-        df_pasien.to_excel(writer, sheet_name='Profil & Target', index=False)
+        # Sheet 1: Rincian Lengkap
+        df_laporan.to_excel(writer, sheet_name='Rincian Lengkap', index=False)
         
-        # Sheet 2: Tabel Menu Harian
-        df_menu = pd.DataFrame(rincian_menu)
-        
-        # Tambahkan Baris Total
-        baris_total = {
-            "nama": "TOTAL ASUPAN",
-            "berat_g": df_menu['berat_g'].sum() if not df_menu.empty else 0,
-            "kalori": total_asupan['kalori'],
-            "protein": total_asupan['protein'],
-            "lemak": total_asupan['lemak'],
-            "karbo": total_asupan['karbo']
-        }
-        df_menu_final = pd.concat([df_menu, pd.DataFrame([baris_total])], ignore_index=True)
-        df_menu_final.to_excel(writer, sheet_name='Rincian Menu', index=False)
-
+        # Sheet 2: Rekap Harian (agregasi per tanggal)
+        if not df_laporan.empty and 'tanggal' in df_laporan.columns:
+            kolom_numerik = ['berat_kotor', 'berat_bersih', 'energi_kcal', 'protein_g', 'lemak_g', 'karbo_g']
+            kolom_ada = [k for k in kolom_numerik if k in df_laporan.columns]
+            
+            if kolom_ada:
+                rekap = df_laporan.groupby('tanggal')[kolom_ada].sum().reset_index().round(1)
+                rekap.to_excel(writer, sheet_name='Rekap Harian', index=False)
+    
     output.seek(0)
     return output
 
 
-def export_to_word(data_pasien: dict, rincian_menu: list, total_asupan: dict, persentase_akg: dict) -> io.BytesIO:
+def export_to_csv(df_laporan: pd.DataFrame) -> bytes:
     """
-    Menghasilkan dokumen Laporan Word (.docx) dalam bentuk BytesIO buffer.
+    Menghasilkan file CSV dari DataFrame laporan.
+    
+    Args:
+        df_laporan: DataFrame berisi data laporan.
+    
+    Returns:
+        Bytes berisi konten CSV (UTF-8 encoded).
+    """
+    return df_laporan.to_csv(index=False).encode('utf-8')
+
+
+def export_to_word(df_laporan: pd.DataFrame, tanggal_awal: str, tanggal_akhir: str) -> io.BytesIO:
+    """
+    Menghasilkan dokumen laporan Word (.docx) dari DataFrame laporan.
+    
+    Args:
+        df_laporan: DataFrame berisi data laporan.
+        tanggal_awal: Tanggal awal periode laporan.
+        tanggal_akhir: Tanggal akhir periode laporan.
+    
+    Returns:
+        BytesIO buffer berisi file .docx (siap di-download di Streamlit).
     """
     doc = Document()
     
     # Judul Laporan
-    title = doc.add_heading('LAPORAN PERENCANAAN MENU GIZI (SPPG)', level=0)
+    title = doc.add_heading('LAPORAN GIZI HARIAN SPPG', level=0)
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     
-    # Section 1: Profil Klien
-    doc.add_heading('1. Profil Klien & Target AKG', level=1)
-    p = doc.add_paragraph()
-    p.add_run(f"Nama Klien     : {data_pasien.get('Nama', '-')}\n").bold = True
-    p.add_run(f"Usia           : {data_pasien.get('Usia', '-')} Tahun\n")
-    p.add_run(f"Jenis Kelamin  : {data_pasien.get('Jenis Kelamin', '-')}\n")
-    p.add_run(f"BB / TB        : {data_pasien.get('Berat Badan (kg)', '-')} kg / {data_pasien.get('Tinggi Badan (cm)', '-')} cm\n")
-    p.add_run(f"Target Kalori  : {data_pasien.get('Target Kalori (kcal)', '-')} kcal/hari\n")
+    # Info Periode
+    doc.add_paragraph(f"Periode: {tanggal_awal} s/d {tanggal_akhir}")
+    doc.add_paragraph("")
     
-    # Section 2: Tabel Rincian Menu
-    doc.add_heading('2. Rincian Menu Makanan', level=1)
+    # Section 1: Rekap Harian
+    doc.add_heading('1. Rekapitulasi Gizi Per Hari', level=1)
     
-    table = doc.add_table(rows=1, cols=6)
-    table.style = 'Table Grid'
+    kolom_numerik = ['berat_kotor', 'berat_bersih', 'energi_kcal', 'protein_g', 'lemak_g', 'karbo_g']
+    kolom_ada = [k for k in kolom_numerik if k in df_laporan.columns]
     
-    # Header Tabel
-    hdr_cells = table.rows[0].cells
-    headers = ['Nama Bahan', 'Berat (g)', 'Kalori (kcal)', 'Protein (g)', 'Lemak (g)', 'Karbo (g)']
-    for i, header_text in enumerate(headers):
-        hdr_cells[i].text = header_text
-        hdr_cells[i].paragraphs[0].runs[0].font.bold = True
+    if kolom_ada and not df_laporan.empty:
+        rekap = df_laporan.groupby('tanggal')[kolom_ada].sum().reset_index().round(1)
         
-    # Isi Data Menu
-    for item in rincian_menu:
-        row_cells = table.add_row().cells
-        row_cells[0].text = str(item['nama'])
-        row_cells[1].text = str(item['berat_g'])
-        row_cells[2].text = str(item['kalori'])
-        row_cells[3].text = str(item['protein'])
-        row_cells[4].text = str(item['lemak'])
-        row_cells[5].text = str(item['karbo'])
+        # Buat tabel rekap
+        table_rekap = doc.add_table(rows=1, cols=len(['Tanggal'] + kolom_ada))
+        table_rekap.style = 'Table Grid'
         
-    # Section 3: Evaluasi AKG
-    doc.add_heading('3. Evaluasi Pemenuhan Nutrisi', level=1)
-    p_eval = doc.add_paragraph()
-    p_eval.add_run(f"• Total Kalori: {total_asupan['kalori']} kcal ({persentase_akg['kalori_pct']}% Target)\n")
-    p_eval.add_run(f"• Total Protein: {total_asupan['protein']} g ({persentase_akg['protein_pct']}% Target)\n")
-    p_eval.add_run(f"• Total Lemak: {total_asupan['lemak']} g ({persentase_akg['lemak_pct']}% Target)\n")
-    p_eval.add_run(f"• Total Karbohidrat: {total_asupan['karbo']} g ({persentase_akg['karbo_pct']}% Target)\n")
+        header_cells = table_rekap.rows[0].cells
+        header_labels = ['Tanggal'] + [k.replace('_', ' ').title() for k in kolom_ada]
+        for i, label in enumerate(header_labels):
+            header_cells[i].text = label
+            for run in header_cells[i].paragraphs[0].runs:
+                run.font.bold = True
+                run.font.size = Pt(9)
+        
+        for _, row in rekap.iterrows():
+            row_cells = table_rekap.add_row().cells
+            row_cells[0].text = str(row['tanggal'])
+            for j, col in enumerate(kolom_ada):
+                row_cells[j + 1].text = str(row[col])
+    
+    # Section 2: Rincian Lengkap
+    doc.add_heading('2. Rincian Bahan & Menu', level=1)
+    
+    kolom_rincian = ['tanggal', 'nama_menu', 'bahan_pangan', 'berat_kotor', 'berat_bersih', 
+                     'energi_kcal', 'protein_g', 'lemak_g', 'karbo_g']
+    kolom_tampil = [k for k in kolom_rincian if k in df_laporan.columns]
+    
+    if kolom_tampil and not df_laporan.empty:
+        table_detail = doc.add_table(rows=1, cols=len(kolom_tampil))
+        table_detail.style = 'Table Grid'
+        
+        header_cells = table_detail.rows[0].cells
+        for i, col in enumerate(kolom_tampil):
+            header_cells[i].text = col.replace('_', ' ').title()
+            for run in header_cells[i].paragraphs[0].runs:
+                run.font.bold = True
+                run.font.size = Pt(8)
+        
+        for _, row in df_laporan[kolom_tampil].iterrows():
+            row_cells = table_detail.add_row().cells
+            for j, col in enumerate(kolom_tampil):
+                row_cells[j].text = str(row[col])
+                for paragraph in row_cells[j].paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = Pt(8)
     
     # Output Buffer
     output = io.BytesIO()

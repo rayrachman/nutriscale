@@ -49,8 +49,8 @@ nutriscale/
 
 ## 🚀 Cara Menjalankan Aplikasi Secara Lokal
 ### 1. Clone Repositori
-Bash
-git clone https://github.com/rayrachman/nutriscale.git
+```bash
+git clone [https://github.com/rayrachman/nutriscale.git](https://github.com/rayrachman/nutriscale.git)
 cd nutriscale
 
 ### 2. Buat & Aktifkan Virtual Environment (Disarankan)
@@ -75,7 +75,7 @@ python database.py
 Bash
 streamlit run app.py
 
-## 💡 Informasi: Aplikasi akan otomatis terbuka di peramban web Anda pada alamat http://localhost:8501.
+### 💡 Informasi: Aplikasi akan otomatis terbuka di peramban web Anda pada alamat http://localhost:8501.
 
 ## 📦 Berkas Dependensi (requirements.txt)
 Daftar modul yang dibutuhkan untuk menjalankan proyek ini:

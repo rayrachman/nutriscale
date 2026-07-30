@@ -35,10 +35,12 @@
 
 ## 🚀 Cara Menjalankan Aplikasi Secara Lokal
 
+## 🚀 Cara Menjalankan Aplikasi Secara Lokal
+
 ### 1. Clone Repositori
 ```bash
-git clone [https://github.com/rayrachman/nutri-scale.git](https://github.com/rayrachman/nutri-scale.git)
-cd nutri-scale
+git clone [https://github.com/rayrachman/nutriscale.git](https://github.com/rayrachman/nutriscale.git)
+cd nutriscale
 2. Install Dependensi
 Bash
 pip install -r requirements.txt

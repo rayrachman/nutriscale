@@ -1,57 +1,66 @@
-🥗 NutriScale SPPG - Platform Analisis & Perencanaan Gizi Presisi
-NutriScale SPPG adalah aplikasi web interaktif berbasis Python & Streamlit yang dirancang khusus untuk memenuhi kebutuhan Ahli Gizi di Satuan Pelayanan Pemenuhan Gizi (SPPG). Aplikasi ini mempermudah perhitungan berat kotor/bersih bahan makanan, analisis nilai gizi makro, pencatatan log harian, hingga pengelolaan 1.200+ data bahan makanan berdasarkan Tabel Komposisi Pangan Indonesia (TKPI).
+🥗 NutriScale SPPG — Platform Analisis & Perencanaan Gizi Presisi
+NutriScale SPPG adalah aplikasi web interaktif berbasis Python dan Streamlit yang dirancang khusus untuk memenuhi kebutuhan Ahli Gizi di Satuan Pelayanan Pemenuhan Gizi (SPPG).
+
+Aplikasi ini mempermudah perhitungan berat kotor/bersih bahan makanan, analisis nilai gizi makro, pencatatan log harian, hingga pengelolaan 1.200+ data bahan makanan berdasarkan Tabel Komposisi Pangan Indonesia (TKPI).
 
 ✨ Fitur Utama
-📝 Input Menu Harian & Autocomplete Bahan:
+📝 Input Menu Harian & Autocomplete Bahan
+Pencarian Cerdas: Autocomplete kata kunci bahan baku langsung dari database TKPI.
 
-Pencarian pintar kata kunci bahan baku dari database TKPI.
+Kalkulasi Otomatis: Perhitungan % BDD (Bagian Dapat Dimakan) dan Berat Bersih secara presisi.
 
-Perhitungan % BDD (Bagian Dapat Dimakan) & Berat Bersih secara otomatis.
+Penyuntingan Interaktif (✏️): Ubah Berat Kotor langsung di dalam tabel untuk penyesuaian porsi target gizi secara real-time.
 
-Edit Berat Kotor Interaktif (✏️) langsung di tabel untuk penyesuaian porsi gizi target secara real-time.
+📊 Laporan & Rekapitulasi Gizi Harian
+Filter Tanggal: Penyaringan laporan berbasis rentang tanggal penyajian.
 
-📊 Laporan & Rekapitulasi Gizi Harian:
+Akumulasi Makronutrisi: Rekap total gramasi dan nilai gizi makro (Energi, Protein, Lemak, Karbohidrat).
 
-Filter laporan berdasarkan rentang tanggal penyajian.
+Visualisasi & Ekspor: Grafik tren asupan energi harian serta opsi ekspor laporan ke format CSV dan Excel.
 
-Akumulasi total gramasi & zat gizi makro (Energi, Protein, Lemak, Karbohidrat).
+📚 Kelola Database Bahan Pangan
+Master Data TKPI/DKBM: Akses dan kelola 1.200+ basis data pangan Indonesia.
 
-Visualisasi grafik asupan energi harian dan opsi Unduh Laporan (CSV / Excel).
+Bahan Kustom: Fitur penambahan bahan pangan baru secara manual.
 
-📚 Kelola & Update Database Bahan Pangan:
+Editor Nilai Gizi: Pembaruan nilai gizi per 100g dan % BDD secara dinamis.
 
-Manajemen 1.200+ data bahan makanan TKPI/DKBM.
+📱 Akses Multi-Platform (PWA Ready)
+Desain Responsif: Tampilan modern dengan tema Full Blue SPPG.
 
-Penambahan bahan pangan kustom secara manual.
+Lintas Perangkat: Dapat diinstal sebagai aplikasi di Laptop/Desktop (Chrome/Edge) maupun ponsel pintar (Android & iOS).
 
-Pengeditan langsung nilai gizi per 100g & % BDD.
-
-📱 Akses Multi-Platform (PWA Ready):
-
-Tampilan responsif dengan tema Full Blue SPPG.
-
-Dapat di-install di Laptop/Desktop (Chrome/Edge) maupun HP (Android & iOS).
-
-🛠️ Teknologi yang Digunakan
+🛠️ Teknologi & Pustaka
 Bahasa Pemrograman: Python 3.10+
 
 Framework Frontend: Streamlit
 
 Database: SQLite3
 
-Pengolahan Data: Pandas, OpenPyXL
+Pengolahan & Ekspor Data: Pandas, OpenPyXL
 
+📁 Struktur Direktori Proyek
+Plaintext
+nutriscale/
+├── app.py              # Berkas utama aplikasi Streamlit
+├── database.py         # Skrip inisialisasi & manajemen database SQLite3
+├── requirements.txt    # Daftar dependensi modul Python
+└── README.md           # Dokumentasi proyek
 🚀 Cara Menjalankan Aplikasi Secara Lokal
 1. Clone Repositori
 Bash
 git clone https://github.com/rayrachman/nutriscale.git
 cd nutriscale
-2. Buat & Aktifkan Virtual Environment (Opsional tapi Disarankan)
+2. Buat & Aktifkan Virtual Environment (Disarankan)
+Linux / macOS:
+
+Bash
+python3 -m venv venv
+source venv/bin/activate
+Windows:
+
 Bash
 python -m venv venv
-# Linux/macOS:
-source venv/bin/activate
-# Windows:
 venv\Scripts\activate
 3. Install Dependensi
 Bash
@@ -59,19 +68,19 @@ pip install -r requirements.txt
 4. Inisialisasi Database
 Bash
 python database.py
-5. Jalankan Aplikasi Streamlit
+5. Jalankan Aplikasi
 Bash
 streamlit run app.py
-💡 Aplikasi akan otomatis terbuka di browser Anda pada alamat http://localhost:8501.
+💡 Informasi: Aplikasi akan otomatis terbuka di peramban web Anda pada alamat http://localhost:8501.
 
-📦 File Dependensi (requirements.txt)
-Pastikan Anda memiliki berkas requirements.txt berisi paket berikut:
+📦 Berkas Dependensi (requirements.txt)
+Daftar modul yang dibutuhkan untuk menjalankan proyek ini:
 
 Plaintext
 streamlit
 pandas
 openpyxl
 👨‍💻 Kredit & Pengembang
-Dikembangkan oleh @rayrachman
+Pengembang Utama: @rayrachman
 
-Project NutriScale — Solusi Teknologi Digitalisasi Layanan Gizi SPPG.
+Proyek: NutriScale — Solusi Teknologi Digitalisasi Layanan Gizi SPPG.

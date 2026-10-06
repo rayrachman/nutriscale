@@ -1,92 +1,218 @@
-# 🥗 NutriScale SPPG — Platform Analisis & Perencanaan Gizi Presisi
-NutriScale SPPG adalah aplikasi web interaktif berbasis Python dan Streamlit yang dirancang khusus untuk memenuhi kebutuhan Ahli Gizi di Satuan Pelayanan Pemenuhan Gizi (SPPG).
+# 🥗 NutriScale SPPG — Platform Analisis & Perencanaan Gizi
 
-Aplikasi ini mempermudah perhitungan berat kotor/bersih bahan makanan, analisis nilai gizi makro, pencatatan log harian, hingga pengelolaan 1.200+ data bahan makanan berdasarkan Tabel Komposisi Pangan Indonesia (TKPI).
+**NutriScale SPPG** adalah aplikasi web interaktif berbasis **Python dan Streamlit** yang dikembangkan untuk membantu proses perencanaan, perhitungan, pencatatan, dan analisis gizi pada lingkungan **Satuan Pelayanan Pemenuhan Gizi (SPPG)**.
 
-## ✨ Fitur Utama
-📝 Input Menu Harian & Autocomplete Bahan
-Pencarian Cerdas: Autocomplete kata kunci bahan baku langsung dari database TKPI.
+Aplikasi ini mengintegrasikan **database lebih dari 1.200 bahan pangan Indonesia** berdasarkan data **Tabel Komposisi Pangan Indonesia (TKPI)**, kalkulasi berat bahan, nilai gizi makro, pencatatan menu harian, serta visualisasi dan ekspor laporan.
 
-Kalkulasi Otomatis: Perhitungan % BDD (Bagian Dapat Dimakan) dan Berat Bersih secara presisi.
+> 🎯 **Goal:** Digitalisasi proses perhitungan dan pencatatan gizi agar lebih terstruktur, konsisten, dan efisien.
 
-Penyuntingan Interaktif (✏️): Ubah Berat Kotor langsung di dalam tabel untuk penyesuaian porsi target gizi secara real-time.
+### 🌐 Live Demo
 
-## 📊 Laporan & Rekapitulasi Gizi Harian
-Filter Tanggal: Penyaringan laporan berbasis rentang tanggal penyajian.
+🚀 **[NutriScale SPPG](https://nutriscale.streamlit.app)**
 
-Akumulasi Makronutrisi: Rekap total gramasi dan nilai gizi makro (Energi, Protein, Lemak, Karbohidrat).
+Aplikasi dapat digunakan melalui browser desktop maupun perangkat mobile.
 
-Visualisasi & Ekspor: Grafik tren asupan energi harian serta opsi ekspor laporan ke format CSV dan Excel.
+---
 
-## 📚 Kelola Database Bahan Pangan
-Master Data TKPI/DKBM: Akses dan kelola 1.200+ basis data pangan Indonesia.
+## ✨ Key Features
 
-Bahan Kustom: Fitur penambahan bahan pangan baru secara manual.
+### 📝 Menu Planning & Ingredient Calculation
 
-Editor Nilai Gizi: Pembaruan nilai gizi per 100g dan % BDD secara dinamis.
+* 🔎 **Smart Ingredient Search** — pencarian bahan pangan berdasarkan database TKPI.
+* ⚖️ **Gross & Net Weight Calculation** — perhitungan berat kotor dan berat bersih berdasarkan % BDD (Bagian yang Dapat Dimakan).
+* ✏️ **Interactive Portion Adjustment** — perubahan berat bahan secara langsung untuk menyesuaikan kebutuhan porsi.
+* 🧮 **Automatic Nutrition Calculation** — perhitungan nilai gizi berdasarkan berat bahan yang digunakan.
 
-## 📱 Akses Multi-Platform (PWA Ready)
-Desain Responsif: Tampilan modern dengan tema Full Blue SPPG.
+### 📊 Nutrition Analysis & Daily Reporting
 
-Lintas Perangkat: Dapat diinstal sebagai aplikasi di Laptop/Desktop (Chrome/Edge) maupun ponsel pintar (Android & iOS).
+* 📅 Filter laporan berdasarkan tanggal penyajian.
+* ⚡ Rekapitulasi energi harian.
+* 💪 Perhitungan protein.
+* 🥑 Perhitungan lemak.
+* 🍚 Perhitungan karbohidrat.
+* 📈 Visualisasi tren asupan energi.
+* 📤 Ekspor data ke **CSV dan Excel**.
 
-## 🛠️ Teknologi & Pustaka
-Bahasa Pemrograman: Python 3.10+
+### 📚 Food Database Management
 
-Framework Frontend: Streamlit
+NutriScale menyediakan database bahan pangan yang dapat dikelola secara langsung.
 
-Database: SQLite3
+* 🗃️ 1.200+ data bahan pangan Indonesia.
+* ➕ Penambahan bahan pangan baru.
+* ✏️ Editing nilai gizi.
+* 📊 Pengelolaan nilai gizi per 100 gram.
+* ⚖️ Pengelolaan % BDD.
+* 💾 Penyimpanan menggunakan SQLite.
 
-Pengolahan & Ekspor Data: Pandas, OpenPyXL
+### 📱 Responsive & PWA-Ready
 
-## 📁 Struktur Direktori Proyek
-Plaintext
+NutriScale dirancang agar dapat digunakan pada berbagai perangkat:
+
+* 💻 Desktop / Laptop
+* 📱 Android
+* 🍎 iOS
+* 🌐 Browser modern
+
+---
+
+## 🧠 Data & Calculation Workflow
+
+Secara umum, proses pengolahan data pada NutriScale mengikuti alur:
+
+```text
+Food Database (TKPI)
+        ↓
+Ingredient Selection
+        ↓
+Gross Weight Input
+        ↓
+BDD Calculation
+        ↓
+Net Weight
+        ↓
+Nutrition Calculation
+        ↓
+Daily Nutrition Summary
+        ↓
+Visualization & Reporting
+```
+
+Konsep dasar perhitungan berat bersih:
+
+```text
+Berat Bersih = Berat Kotor × (%BDD / 100)
+```
+
+Nilai gizi kemudian dihitung berdasarkan berat bersih bahan yang digunakan.
+
+---
+
+## 🛠️ Technology Stack
+
+### Programming Language
+
+* Python 3.10+
+
+### Framework
+
+* Streamlit
+
+### Data Processing
+
+* Pandas
+* OpenPyXL
+
+### Database
+
+* SQLite3
+
+### Deployment
+
+* Streamlit Community Cloud
+
+---
+
+## 📁 Project Structure
+
+```text
 nutriscale/
-├── app.py              # Berkas utama aplikasi Streamlit
-├── database.py         # Skrip inisialisasi & manajemen database SQLite3
-├── requirements.txt    # Daftar dependensi modul Python
-└── README.md           # Dokumentasi proyek
+│
+├── app.py              # Main Streamlit application
+├── database.py         # SQLite database initialization & management
+├── requirements.txt    # Python dependencies
+└── README.md           # Project documentation
+```
 
-## 🚀 Cara Menjalankan Aplikasi Secara Lokal
-### 1. Clone Repositori
-```Bash
-git clone [https://github.com/rayrachman/nutriscale.git](https://github.com/rayrachman/nutriscale.git)
+---
+
+## 🚀 Run Locally
+
+### 1. Clone Repository
+
+```bash
+git clone https://github.com/rayrachman/nutriscale.git
 cd nutriscale
 ```
-### 2. Buat & Aktifkan Virtual Environment (Disarankan)
-Linux / macOS:
-```Bash
-python3 -m venv venv
-source venv/bin/activate
-```
-Windows:
-```Bash
+
+### 2. Create Virtual Environment
+
+#### Windows
+
+```bash
 python -m venv venv
 venv\Scripts\activate
 ```
-### 3. Install Dependensi
-```Bash
+
+#### Linux / macOS
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. Install Dependencies
+
+```bash
 pip install -r requirements.txt
 ```
-### 4. Inisialisasi Database
-```Bash
+
+### 4. Initialize Database
+
+```bash
 python database.py
 ```
-### 5. Jalankan Aplikasi
-```Bash
+
+### 5. Run Application
+
+```bash
 streamlit run app.py
 ```
-### 💡 Informasi: Aplikasi akan otomatis terbuka di peramban web Anda pada alamat http://localhost:8501.
 
-## 📦 Berkas Dependensi (requirements.txt)
-Daftar modul yang dibutuhkan untuk menjalankan proyek ini:
+The application will be available at:
 
-Plaintext
+```text
+http://localhost:8501
+```
+
+---
+
+## 📦 Dependencies
+
+```text
 streamlit
 pandas
 openpyxl
+```
 
-## 👨‍💻 Kredit & Pengembang
-Pengembang Utama: @rayrachman
+---
 
-Proyek: NutriScale — Solusi Teknologi Digitalisasi Layanan Gizi SPPG.
+## 🎯 Project Highlights
+
+| Area                  | Implementation            |
+| --------------------- | ------------------------- |
+| Data Processing       | Pandas                    |
+| Database Management   | SQLite                    |
+| Nutrition Calculation | Python                    |
+| Data Visualization    | Streamlit                 |
+| Data Export           | CSV & Excel               |
+| Web Application       | Streamlit                 |
+| Deployment            | Streamlit Community Cloud |
+| Responsive UI         | Desktop & Mobile          |
+
+---
+
+## 👨‍💻 Developer
+
+**Moch Rayhan Aulia Rachman**
+
+Information Technology → Data Science & Machine Learning
+
+GitHub: [@rayrachman](https://github.com/rayrachman)
+
+---
+
+## 📌 Disclaimer
+
+NutriScale is a software project intended to support data management, calculation, and reporting workflows.
+
+The application does not replace professional judgment from qualified nutritionists or other healthcare professionals.
